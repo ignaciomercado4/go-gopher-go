@@ -60,6 +60,12 @@ func (g *Game) Update() error {
 	if ebiten.IsKeyPressed(ebiten.KeyArrowDown) {
 		g.player.MoveBackwards()
 	}
+	if ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
+		g.player.MoveLeft()
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
+		g.player.MoveRight()
+	}
 
 	return nil
 }
@@ -88,19 +94,26 @@ func (p *player) drawPlayer(screen *ebiten.Image) {
 }
 
 func (p *player) MoveForward() {
-	p.positionY++
-
+	p.positionY--
 }
 
 func (p *player) MoveBackwards() {
-	p.positionY--
+	p.positionY++
+}
+
+func (p *player) MoveLeft() {
+	p.positionX--
+}
+
+func (p *player) MoveRight() {
+	p.positionX++
 }
 
 func main() {
 	game := &Game{
 		player: &player{
-			positionX: 0,
-			positionY: 0,
+			positionX: 450,
+			positionY: 450,
 		},
 	}
 	ebiten.SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT)
