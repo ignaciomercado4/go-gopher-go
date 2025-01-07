@@ -1,15 +1,27 @@
 package main
 
 import (
-	"image/color"
+	"bytes"
+	"fmt"
+	"image"
 	"log"
 
+	rplatformer "github.com/hajimehoshi/ebiten/v2/examples/resources/images/platformer"
+
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 const (
 	SCREEN_HEIGHT = 900
 	SCREEN_WIDTH  = 900
+	unit          = 0.5
+)
+
+var (
+	leftSprite  *ebiten.Image
+	rightSprite *ebiten.Image
+	idleSprite  *ebiten.Image
 )
 
 type Game struct {
@@ -19,6 +31,26 @@ type Game struct {
 type player struct {
 	positionX int
 	positionY int
+}
+
+func init() {
+	img, _, err := image.Decode(bytes.NewReader(rplatformer.Right_png))
+	if err != nil {
+		panic(err)
+	}
+	rightSprite = ebiten.NewImageFromImage(img)
+
+	img, _, err = image.Decode(bytes.NewReader(rplatformer.Left_png))
+	if err != nil {
+		panic(err)
+	}
+	leftSprite = ebiten.NewImageFromImage(img)
+
+	img, _, err = image.Decode(bytes.NewReader(rplatformer.MainChar_png))
+	if err != nil {
+		panic(err)
+	}
+	idleSprite = ebiten.NewImageFromImage(img)
 }
 
 func (g *Game) Update() error {
@@ -33,22 +65,28 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	switch {
-	case g.player.positionY == 0:
-		screen.Fill(color.Black)
-	case g.player.positionY > 0 && g.player.positionY <= 10:
-		screen.Fill(color.RGBA{0x66, 0xcc, 0xff, 0xff})
-	case g.player.positionY > 10:
-		screen.Fill(color.White)
-	}
+	g.player.drawPlayer(screen)
+
+	tutorial := "Move: arrow keys\nLet Gopher eat all those apples!"
+	msg := fmt.Sprintf("TPS: %0.2f\nFPS: %0.2f\n%s", ebiten.ActualTPS(), ebiten.ActualFPS(), tutorial)
+	ebitenutil.DebugPrint(screen, msg)
 
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 320, 240
+	return 900, 900
 }
 
-// player movement
+// player
+func (p *player) drawPlayer(screen *ebiten.Image) {
+	s := idleSprite
+	op := &ebiten.DrawImageOptions{}
+
+	op.GeoM.Scale(0.5, 0.5)
+	op.GeoM.Translate(float64(p.positionX)/unit, float64(p.positionY)/unit)
+	screen.DrawImage(s, op)
+}
+
 func (p *player) MoveForward() {
 	p.positionY++
 
